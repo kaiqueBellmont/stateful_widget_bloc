@@ -7,7 +7,7 @@ import 'package:stateful_widget/presentation/pages/add_edit_task_page.dart';
 class TaskListPage extends StatefulWidget {
   final TaskBloc taskBloc;
 
-  TaskListPage({required this.taskBloc});
+  const TaskListPage({super.key, required this.taskBloc});
 
   @override
   _TaskListPageState createState() => _TaskListPageState();
@@ -24,7 +24,7 @@ class _TaskListPageState extends State<TaskListPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Task List'),
+        title: const Text('Task List'),
       ),
       body: StreamBuilder<List<Task>>(
         stream: widget.taskBloc.tasks,
@@ -36,7 +36,7 @@ class _TaskListPageState extends State<TaskListPage> {
           }
 
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return Center(
+            return const Center(
               child: CircularProgressIndicator(),
             );
           }
@@ -84,7 +84,7 @@ class _TaskListPageState extends State<TaskListPage> {
           }
         },
         tooltip: 'Add Task',
-        child: Icon(Icons.add),
+        child: const Icon(Icons.add),
       ),
     );
   }
