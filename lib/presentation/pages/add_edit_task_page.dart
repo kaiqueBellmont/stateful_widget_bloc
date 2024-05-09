@@ -5,9 +5,8 @@ class AddEditTaskPage extends StatelessWidget {
   final Task? task;
   final TextEditingController _textController;
 
-  AddEditTaskPage({Key? key, this.task})
-      : _textController = TextEditingController(text: task?.name),
-        super(key: key);
+  AddEditTaskPage({super.key, this.task})
+      : _textController = TextEditingController(text: task?.name);
 
   @override
   Widget build(BuildContext context) {
@@ -16,10 +15,10 @@ class AddEditTaskPage extends StatelessWidget {
         title: Text(task == null ? 'Add Task' : 'Edit Task'),
       ),
       body: Padding(
-        padding: EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(16.0),
         child: TextField(
           controller: _textController,
-          decoration: InputDecoration(
+          decoration: const InputDecoration(
             labelText: 'Task Name',
           ),
           autofocus: true,
