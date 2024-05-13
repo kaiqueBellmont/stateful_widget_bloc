@@ -3,6 +3,7 @@ import 'package:stateful_widget/data/api/task_api_client.dart';
 import 'package:stateful_widget/data/task_repository.dart';
 import 'package:stateful_widget/domain/task.dart';
 import 'package:http/http.dart' as http;
+import 'package:stateful_widget/presentation/pages/add_edit_task_page.dart';
 
 void main() {
   final taskApiClient = TaskApiClient(httpClient: http.Client());
@@ -50,7 +51,7 @@ class _TaskListScreenState extends State<TaskListScreen> {
     try {
       final tasks = await widget.taskRepository.fetchTasks();
       setState(() {
-        _tasks = tasks;
+        _tasks = tasks!;
       });
     } catch (e) {
       print('Error fetching tasks: $e');
@@ -62,24 +63,67 @@ class _TaskListScreenState extends State<TaskListScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Task List'),
+        title: const Text('Task List'),
+        backgroundColor: Colors.blue,
       ),
       body: ListView.builder(
         itemCount: _tasks.length,
         itemBuilder: (context, index) {
           final task = _tasks[index];
-          return ListTile(
-            title: Text(task.name),
-            // Implemente outras partes do ListTile conforme necessário
+          return Card(
+            elevation: 2,
+            margin: EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+            child: ListTile(
+              title: Text(
+                task.name,
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
+              leading: Icon(Icons.assignment_turned_in),
+              trailing: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  IconButton(
+                    icon: Icon(Icons.edit),
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => AddEditTaskPage(task: task),
+                        ),
+                      ).then((editedTask) {
+                        if (editedTask != null) {
+                          _fetchTasks();
+                        }
+                      });
+                    },
+                  ),
+                  IconButton(
+                    icon: Icon(Icons.delete),
+                    onPressed: () {
+                      // Adicione a lógica para excluir a tarefa aqui
+                    },
+                  ),
+                ],
+              ),
+              onTap: () {
+                // Adicione a lógica para visualizar a tarefa aqui
+              },
+            ),
           );
         },
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          // Implemente a lógica para adicionar uma nova tarefa
+        onPressed: () async {
+          final newTask = await Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => AddEditTaskPage()),
+          );
+          if (newTask != null) {
+            _fetchTasks();
+          }
         },
         tooltip: 'Add Task',
-        child: Icon(Icons.add),
+        child: const Icon(Icons.add),
       ),
     );
   }
