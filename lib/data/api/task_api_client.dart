@@ -3,7 +3,7 @@ import 'package:stateful_widget/domain/task.dart';
 import 'package:http/http.dart' as http;
 
 class TaskApiClient {
-  static const baseUrl = 'ttps://api.example.com/tasks';
+  static const baseUrl = 'https://api.example.com/tasks';
 
   final http.Client httpClient;
 
