@@ -3,18 +3,19 @@ import 'package:stateful_widget/domain/task.dart';
 import 'package:http/http.dart' as http;
 
 class TaskApiClient {
-  static const baseUrl = 'https://api.example.com/tasks';
+  static const baseUrl = 'localhost:5000/tasks';
 
   final http.Client httpClient;
 
   TaskApiClient({required this.httpClient});
 
-  Future<List> getTasks() async {
+  Future<List<Task>> getTasks() async {
     final response = await httpClient.get(Uri.parse(baseUrl));
 
     if (response.statusCode == 200) {
       final List<dynamic> data = jsonDecode(response.body);
-      return data.map((json) => Task.fromJson(json)).toList();
+      final List<Task> tasks = data.map((rawTask) => Task.fromJson(rawTask)).toList();
+      return tasks;
     } else {
       throw Exception('Failed to load tasks');
     }

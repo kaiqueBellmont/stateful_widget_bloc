@@ -1,29 +1,24 @@
+import 'package:stateful_widget/data/api/task_api_client.dart';
 import 'package:stateful_widget/domain/task.dart';
-import 'package:stateful_widget/domain/task_repository_interface.dart';
 
-class TaskRepository implements TaskRepositoryInterface {
-  List<Task> _tasks = [];
+class TaskRepository {
+  final TaskApiClient _apiClient;
 
-  @override
-  Future<List<Task>> getTasks() async {
-    return _tasks;
+  TaskRepository({required TaskApiClient apiClient}) : _apiClient = apiClient;
+
+  Future<List<Task>> fetchTasks() async {
+    return await _apiClient.getTasks();
   }
 
-  @override
-  Future<void> addTask(Task task) async {
-    _tasks.add(task);
+  Future<Task> addTask(Task task) async {
+    return _apiClient.addTask(task);
   }
 
-  @override
-  Future<void> updateTask(Task task) async {
-    final index = _tasks.indexWhere((t) => t.name == task.name);
-    if (index != -1) {
-      _tasks[index] = task;
-    }
+  Future<Task> updateTask(Task task) async {
+    return _apiClient.updateTask(task);
   }
 
-  @override
-  Future<void> deleteTask(Task task) async {
-    _tasks.removeWhere((t) => t.name == task.name);
+  Future<void> deleteTask(int id) async {
+    return _apiClient.deleteTask(id);
   }
 }

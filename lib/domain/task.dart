@@ -13,11 +13,11 @@ class Task {
     );
   }
 
-  static fromJson(json) {
+  static Task fromJson(Map<String, dynamic> json) {
     return Task(json['name'], isCompleted: json['is_completed']);
   }
 
-  Object? toJson() {
+  Map<String, dynamic> toJson() {
     return {
       'name': name,
       'is_completed': isCompleted,
