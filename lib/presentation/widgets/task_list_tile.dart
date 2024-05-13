@@ -7,7 +7,8 @@ class TaskListTile extends StatelessWidget {
   final VoidCallback onDeletePressed;
   final VoidCallback onEditPressed;
 
-  TaskListTile({
+  const TaskListTile({
+    super.key,
     required this.task,
     required this.onTaskTapped,
     required this.onDeletePressed,
@@ -24,11 +25,11 @@ class TaskListTile extends StatelessWidget {
         ),
       ),
       leading: IconButton(
-        icon: Icon(Icons.edit),
+        icon: const Icon(Icons.edit),
         onPressed: onEditPressed,
       ),
       trailing: IconButton(
-        icon: Icon(Icons.delete),
+        icon: const Icon(Icons.delete),
         onPressed: onDeletePressed,
       ),
       onTap: onTaskTapped,
