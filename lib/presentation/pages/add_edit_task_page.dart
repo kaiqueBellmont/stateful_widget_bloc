@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:stateful_widget/data/task_repository.dart';
 import 'package:stateful_widget/domain/task.dart';
 
 class AddEditTaskPage extends StatelessWidget {
   final Task? task;
   final TextEditingController _textController;
+  final TaskRepository taskRepository;
 
-  AddEditTaskPage({super.key, this.task})
+  AddEditTaskPage({super.key, this.task, required this.taskRepository})
       : _textController = TextEditingController(text: task?.name);
 
   @override
@@ -23,7 +25,17 @@ class AddEditTaskPage extends StatelessWidget {
           ),
           autofocus: true,
           onSubmitted: (value) {
-            final updatedTask = task?.copyWith(name: value) ?? Task(value);
+            final updatedTask = task?.copyWith(name: value) ??
+                Task(
+                  id: task?.id,
+                  name: value,
+                  isCompleted: false,
+                );
+            if (task == null) {
+              taskRepository.addTask(updatedTask);
+            } else {
+              taskRepository.updateTask(updatedTask);
+            }
             Navigator.pop(context, updatedTask);
           },
         ),

@@ -1,97 +1,123 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:stateful_widget/domain/task.dart';
-import 'package:stateful_widget/presentation/bloc/task_bloc.dart';
-import 'package:stateful_widget/presentation/widgets/task_list_tile.dart';
+import 'package:stateful_widget/data/task_repository.dart';
 import 'package:stateful_widget/presentation/pages/add_edit_task_page.dart';
+import 'package:stateful_widget/domain/task.dart';
 
-class TaskListPage extends StatefulWidget {
-  final TaskBloc taskBloc;
+class TaskListScreen extends StatefulWidget {
+  final TaskRepository taskRepository;
 
-  const TaskListPage({super.key, required this.taskBloc});
+  const TaskListScreen({super.key, required this.taskRepository});
 
   @override
-  _TaskListPageState createState() => _TaskListPageState();
+  State<TaskListScreen> createState() => _TaskListScreenState();
 }
 
-class _TaskListPageState extends State<TaskListPage> {
+class _TaskListScreenState extends State<TaskListScreen> {
+  List<Task> _tasks = [];
+
   @override
   void initState() {
     super.initState();
-    widget.taskBloc.fetchTasks();
+    _fetchTasks();
+  }
+
+  void _fetchTasks() async {
+    try {
+      final tasks = await widget.taskRepository.fetchTasks();
+      setState(() {
+        _tasks = tasks;
+      });
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error fetching tasks: $e');
+      }
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Task List'),
+        title: const Text('Task List', style: TextStyle(color: Colors.white)),
+        centerTitle: true,
+        backgroundColor: Colors.blue,
       ),
-      body: StreamBuilder<List<Task>>(
-        stream: widget.taskBloc.tasks,
-        builder: (context, snapshot) {
-          if (snapshot.hasError) {
-            return Center(
-              child: Text('Error: ${snapshot.error}'),
-            );
-          }
-
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(
-              child: CircularProgressIndicator(),
-            );
-          }
-
-          final tasks = snapshot.data;
-
-          return ListView.builder(
-            itemCount: tasks?.length ?? 0,
-            itemBuilder: (context, index) {
-              final task = tasks![index];
-              return TaskListTile(
-                task: task,
-                onTaskTapped: () {
-                  // Toggle task completion status
-                  task.isCompleted = !task.isCompleted;
-                  widget.taskBloc.updateTask(task);
-                },
-                onDeletePressed: () {
-                  widget.taskBloc.deleteTask(task);
-                },
-                onEditPressed: () async {
-                  final updatedTask = await Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => AddEditTaskPage(task: task),
+      body: Column(
+        children: [
+          Expanded(
+            child: ListView.builder(
+              itemCount: _tasks.length,
+              itemBuilder: (context, index) {
+                final task = _tasks[index];
+                return ListTile(
+                  title: Text(
+                    task.name,
+                    style: TextStyle(
+                      decoration: task.isCompleted ? TextDecoration.lineThrough : null,
                     ),
-                  );
-                  if (updatedTask != null) {
-                    widget.taskBloc.updateTask(updatedTask);
-                  }
-                },
-              );
-            },
-          );
-        },
+                  ),
+                  leading: IconButton(
+                    icon: const Icon(Icons.edit),
+                    onPressed: () async {
+                      final updatedTask = await Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => AddEditTaskPage(
+                            task: task,
+                            taskRepository: widget.taskRepository,
+                          ),
+                        ),
+                      );
+                      if (updatedTask != null) {
+                        setState(() {
+                          _tasks[index] = updatedTask;
+                        });
+                      }
+                    },
+                  ),
+                  trailing: IconButton(
+                    icon: const Icon(Icons.delete),
+                    onPressed: () async {
+                      await widget.taskRepository.deleteTask(task.id!);
+                      setState(() {
+                        _tasks.removeAt(index);
+                      });
+                    },
+                  ),
+                  onTap: () async {
+                    task.isCompleted = !task.isCompleted;
+                    await widget.taskRepository.updateTask(task);
+                    setState(() {
+                      _tasks[index] = task;
+                    });
+                  },
+                );
+              },
+            ),
+          ),
+        ],
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () async {
           final newTask = await Navigator.push(
             context,
-            MaterialPageRoute(builder: (context) => AddEditTaskPage()),
+            MaterialPageRoute(
+              builder: (context) => AddEditTaskPage(
+                taskRepository: widget.taskRepository,
+              ),
+            ),
           );
           if (newTask != null) {
-            widget.taskBloc.addTask(newTask);
+            setState(() {
+              _tasks.add(newTask);
+            });
+            _fetchTasks();
           }
         },
         tooltip: 'Add Task',
         child: const Icon(Icons.add),
       ),
     );
-  }
-
-  @override
-  void dispose() {
-    widget.taskBloc.dispose();
-    super.dispose();
   }
 }

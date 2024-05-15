@@ -1,24 +1,29 @@
 class Task {
+  final int? id;
   final String name;
   bool isCompleted;
 
-  Task(this.name, {this.isCompleted = false});
+  Task({this.id, required this.name, this.isCompleted = false});
 
-  get id => null;
-
-  Task copyWith({String? name, bool? isCompleted}) {
+  Task copyWith({int? id, String? name, bool? isCompleted}) {
     return Task(
-      name ?? this.name,
+      id: id ?? this.id,
+      name: name ?? this.name,
       isCompleted: isCompleted ?? this.isCompleted,
     );
   }
 
-  static Task fromJson(Map<String, dynamic> json) {
-    return Task(json['name'], isCompleted: json['is_completed']);
+  factory Task.fromJson(Map<String, dynamic> json) {
+    return Task(
+      id: json['id'],
+      name: json['name'],
+      isCompleted: json['is_completed'] ?? false,
+    );
   }
 
   Map<String, dynamic> toJson() {
     return {
+      'id': id,
       'name': name,
       'is_completed': isCompleted,
     };
